@@ -226,7 +226,7 @@ public class FlatFileItemReaderBinary<T> extends AbstractItemCountingItemStreamI
 			
 			
 			
-			System.out.println("=====rear====="+line);
+			System.out.println("=====read====="+line);
 			//line = this.reader.readLine();
 			
 			if (line == null) {

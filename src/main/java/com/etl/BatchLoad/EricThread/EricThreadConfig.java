@@ -26,6 +26,7 @@ import org.springframework.util.StringUtils;
 import com.etl.BatchLoad.comm.FlatFileItemReaderBinary;
 
 
+
 @EnableBatchProcessing
 @Configuration
 public class EricThreadConfig {
@@ -46,8 +47,8 @@ public class EricThreadConfig {
 	        .<EricThread, EricThread>chunk(50000).reader(reader2())
 	        .processor(processor2())
 	        .writer(writer2())
-	        .taskExecutor(taskExecutor())
-	        .throttleLimit(5)
+	      //  .taskExecutor(taskExecutor())
+	       // .throttleLimit(5)
 	        .build();
 	  }
 
@@ -117,15 +118,14 @@ public class EricThreadConfig {
 	    return new EricThreadProcessor();
 	  }
 
-
+//JdbcBatchItemWriter
 	  @Bean
-	  public JdbcBatchItemWriter<EricThread> writer2() {
-		  
-		  JdbcBatchItemWriter<EricThread> iwt = new JdbcBatchItemWriter<>();
-		
+	  public EricItemWriter<EricThread> writer2() {
+		   
+		    EricItemWriter<EricThread> iwt = new EricItemWriter<>();
+		   
 	        iwt.setDataSource(conn);
 	        iwt.setItemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<EricThread>());
-	        //itemWriter.setSql("INSERT INTO ERIC_THREAD (COL1) VALUES (:lastName)");
 	        iwt.setSql("INSERT INTO ERIC_THREAD (COL1, COL2,COL3,COL4,COL5,COL6,COL7) VALUES (:col1,:col2,:col3,:col4,:col5,:col6,:col7)");
 	        
 	        return iwt;
