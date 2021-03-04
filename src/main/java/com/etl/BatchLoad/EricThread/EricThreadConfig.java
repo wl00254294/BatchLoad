@@ -2,6 +2,7 @@ package com.etl.BatchLoad.EricThread;
 import javax.sql.DataSource;
 
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -39,7 +40,9 @@ public class EricThreadConfig {
 	  public Job ericJob (JobBuilderFactory jobBuilders,
 	      StepBuilderFactory stepBuilders)  throws Exception{
 	    return jobBuilders.get("ericJob")
-	        .start(ericStep(stepBuilders)).build();
+	        .start(ericStep(stepBuilders))
+	        .listener(jobExecutionEricThreadListener())
+	        .build();
 	  }
 
 	  @Bean
@@ -167,4 +170,10 @@ public class EricThreadConfig {
 	        
 	        return iwt;
 	  }
+	  
+	    @Bean
+	    public JobExecutionListener jobExecutionEricThreadListener() {
+	        return new EricThreadListener();
+	    }
+
 }
