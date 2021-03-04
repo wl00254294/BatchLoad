@@ -29,13 +29,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Restartable {@link ItemReader} that reads lines from input {@link #setResource(Resource)}. Line is defined by the
- * {@link #setRecordSeparatorPolicy(RecordSeparatorPolicy)} and mapped to item using {@link #setLineMapper(LineMapper)}.
- * If an exception is thrown during line mapping it is rethrown as {@link FlatFileParseException} adding information
- * about the problematic line and its line number.
- * 
- * @author Robert Kasanicky
- * @author Mahmoud Ben Hassine
+ * 依據固定長度讀取資料(資料不換行)
  */
 public class FlatFileItemReaderBinary<T> extends AbstractItemCountingItemStreamItemReader<T> implements
 		ResourceAwareItemReaderItemStream<T>, InitializingBean {

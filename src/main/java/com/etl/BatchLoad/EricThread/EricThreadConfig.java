@@ -15,6 +15,7 @@ import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.separator.RecordSeparatorPolicy;
 import org.springframework.batch.item.file.transform.FixedLengthTokenizer;
 import org.springframework.batch.item.file.transform.Range;
+import org.springframework.batch.item.support.ClassifierCompositeItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,20 +36,21 @@ public class EricThreadConfig {
 
 		
 	  @Bean
-	  public Job ericJob(JobBuilderFactory jobBuilders,
-	      StepBuilderFactory stepBuilders) {
+	  public Job ericJob (JobBuilderFactory jobBuilders,
+	      StepBuilderFactory stepBuilders)  throws Exception{
 	    return jobBuilders.get("ericJob")
 	        .start(ericStep(stepBuilders)).build();
 	  }
 
 	  @Bean
-	  public Step ericStep(StepBuilderFactory stepBuilders) {
+	  public Step ericStep(StepBuilderFactory stepBuilders) throws Exception{
 	    return stepBuilders.get("ericStep")
-	        .<EricThread, EricThread>chunk(50000).reader(reader2())
+	        .<EricThread, EricThread>chunk(50000) //每50000筆commit
+	        .reader(reader2())
 	        .processor(processor2())
-	        .writer(writer2())
-	      //  .taskExecutor(taskExecutor())
-	       // .throttleLimit(5)
+	        .writer(classifierItemWriter())
+            .taskExecutor(taskExecutor())
+	        .throttleLimit(5) //5個thread
 	        .build();
 	  }
 
@@ -77,6 +79,10 @@ public class EricThreadConfig {
 		  return itemReader;
 		  
 	  }  
+	  
+	  /*
+	   * 設置異步處理資料
+	   */
 	  @Bean
 	  public TaskExecutor taskExecutor() {
 	      return new SimpleAsyncTaskExecutor("eric_batch");
@@ -94,6 +100,9 @@ public class EricThreadConfig {
 	        return lineMapper;
 	  }	  
 	  
+	  /*
+	   * 設定欄位(位置區分)
+	   */
 	  @Bean
 	  public FixedLengthTokenizer fixedLengthTokenizer2() {
 	  	FixedLengthTokenizer tokenizer = new FixedLengthTokenizer();
@@ -118,15 +127,43 @@ public class EricThreadConfig {
 	    return new EricThreadProcessor();
 	  }
 
-//JdbcBatchItemWriter
+	  /*
+	   * 設置分類器
+	   */
 	  @Bean
-	  public EricItemWriter<EricThread> writer2() {
+	    public ClassifierCompositeItemWriter classifierItemWriter() throws Exception {
+	        ClassifierCompositeItemWriter compositeItemWriter = new ClassifierCompositeItemWriter();
+	        compositeItemWriter.setClassifier(new EricThreadClassifier(insertTable1(), insertTable2()));
+	        return compositeItemWriter;
+	    }
+	 
+	  /*
+	   * wirter1 寫入 Eric_Thread table
+	   */
+	  @Bean
+	  public JdbcBatchItemWriter<EricThread> insertTable1() {
 		   
-		    EricItemWriter<EricThread> iwt = new EricItemWriter<>();
+		     JdbcBatchItemWriter<EricThread> iwt = new JdbcBatchItemWriter<>();
 		   
 	        iwt.setDataSource(conn);
 	        iwt.setItemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<EricThread>());
 	        iwt.setSql("INSERT INTO ERIC_THREAD (COL1, COL2,COL3,COL4,COL5,COL6,COL7) VALUES (:col1,:col2,:col3,:col4,:col5,:col6,:col7)");
+	        
+	        return iwt;
+	  }
+	  
+	  
+	  /*
+	   * wirter2 寫入 Eric_Thread2 table
+	   */
+	  @Bean
+	  public JdbcBatchItemWriter<EricThread> insertTable2() {
+		   
+		     JdbcBatchItemWriter<EricThread> iwt = new JdbcBatchItemWriter<>();
+		   
+	        iwt.setDataSource(conn);
+	        iwt.setItemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<EricThread>());
+	        iwt.setSql("INSERT INTO ERIC_THREAD2 (COL1, COL2,COL3,COL4,COL5,COL6,COL7) VALUES (:col1,:col2,:col3,:col4,:col5,:col6,:col7)");
 	        
 	        return iwt;
 	  }
