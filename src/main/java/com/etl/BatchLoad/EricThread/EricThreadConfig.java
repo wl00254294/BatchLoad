@@ -18,6 +18,7 @@ import org.springframework.batch.item.file.transform.FixedLengthTokenizer;
 import org.springframework.batch.item.file.transform.Range;
 import org.springframework.batch.item.support.ClassifierCompositeItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
@@ -27,15 +28,19 @@ import org.springframework.util.StringUtils;
 
 import com.etl.BatchLoad.comm.FlatFileItemReaderBinary;
 import com.etl.BatchLoad.comm.ItemCountListener;
+import com.etl.BatchLoad.comm.JobListener;
+import com.etl.BatchLoad.config.BatchConfig;
 
 
 
 @EnableBatchProcessing
 @Configuration
 public class EricThreadConfig {
-	 @Autowired
-	 DataSource conn;
-
+	 
+     @Autowired
+     private DataSource ds1;
+     
+ 
 		
 	  @Bean
 	  public Job ericJob (JobBuilderFactory jobBuilders,
@@ -53,38 +58,39 @@ public class EricThreadConfig {
 	        .reader(reader2())
 	        .processor(processor2())
 	        .writer(classifierItemWriter())
-	        .listener(cntlistener())
-	        
+	        .listener(readlistener())
+	        .listener(errorlistener()) //紀錄wiriter reader process 有問題狀態
+	        .listener(cntlistener()) //紀錄讀取筆數(因parallel執行須透過chunklistener)
             .taskExecutor(taskExecutor())
 	        .throttleLimit(5) //5個thread
 	        .build();
 	  }
 
 	 // 資料換行
-	  //@Bean
-	 // public FlatFileItemReader<EricThread> reader2() {
-//		  FlatFileItemReader<EricThread> itemReader = new FlatFileItemReader<EricThread>();
-//		  itemReader.setEncoding("MS950");
-//		  itemReader.setLineMapper(lineMapper2());
-		
-//		  itemReader.setResource(new FileSystemResource("C:\\cr\\EcsWeb\\media\\1\\2.txt"));
-		  
-//		  return itemReader;
-		  
-//	  }
-	  
-	  //資料在同一行
 	  @Bean
-	  public FlatFileItemReaderBinary<EricThread> reader2() {
-		  FlatFileItemReaderBinary<EricThread> itemReader = new FlatFileItemReaderBinary<EricThread>();
+	  public FlatFileItemReader<EricThread> reader2() {
+		  FlatFileItemReader<EricThread> itemReader = new FlatFileItemReader<EricThread>();
 		  itemReader.setEncoding("MS950");
 		  itemReader.setLineMapper(lineMapper2());
-		  itemReader.setRecordLength(53);
-		  itemReader.setResource(new FileSystemResource("C:\\cr\\EcsWeb\\media\\1\\2.txt"));
+		
+		  itemReader.setResource(new FileSystemResource("C:\\cr\\EcsWeb\\media\\1\\1.txt"));
 		  
 		  return itemReader;
 		  
-	  }  
+	  }
+	  
+	  //資料在同一行
+	 // @Bean
+	 // public FlatFileItemReaderBinary<EricThread> reader2() {
+	//	  FlatFileItemReaderBinary<EricThread> itemReader = new FlatFileItemReaderBinary<EricThread>();
+	//	  itemReader.setEncoding("MS950");
+	//	  itemReader.setLineMapper(lineMapper2());
+	//	  itemReader.setRecordLength(53);
+	//	  itemReader.setResource(new FileSystemResource("C:\\cr\\EcsWeb\\media\\1\\2.txt"));
+		  
+	//	  return itemReader;
+		  
+	//  }  
 	  
 	  /*
 	   * 設置異步處理資料
@@ -123,7 +129,7 @@ public class EricThreadConfig {
 	  	                    new Range(53, 53)
 	  			            );
 	  	
-	  	tokenizer.setStrict(false);
+	  	tokenizer.setStrict(false); 
 
 	  	return tokenizer;
 	  }
@@ -150,8 +156,8 @@ public class EricThreadConfig {
 	  public JdbcBatchItemWriter<EricThread> insertTable1() {
 		   
 		     JdbcBatchItemWriter<EricThread> iwt = new JdbcBatchItemWriter<>();
-		   
-	        iwt.setDataSource(conn);
+		    
+	        iwt.setDataSource(ds1);
 	        iwt.setItemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<EricThread>());
 	        iwt.setSql("INSERT INTO ERIC_THREAD (COL1, COL2,COL3,COL4,COL5,COL6,COL7) VALUES (:col1,:col2,:col3,:col4,:col5,:col6,:col7)");
 	        
@@ -167,7 +173,7 @@ public class EricThreadConfig {
 		   
 		     JdbcBatchItemWriter<EricThread> iwt = new JdbcBatchItemWriter<>();
 		   
-	        iwt.setDataSource(conn);
+	        iwt.setDataSource(ds1);
 	        iwt.setItemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<EricThread>());
 	        iwt.setSql("INSERT INTO ERIC_THREAD2 (COL1, COL2,COL3,COL4,COL5,COL6,COL7) VALUES (:col1,:col2,:col3,:col4,:col5,:col6,:col7)");
 	        
@@ -177,12 +183,36 @@ public class EricThreadConfig {
 	    //job start 時cache reference
 	    @Bean
 	    public JobExecutionListener jobExecutionEricThreadListener() {
-	        return new EricThreadListener();
+	    	JobListener listen = new JobListener("ERIC_THREAD","Y");
+	    	listen.setCacheRefTableInfo("REF", "SELECT ACCT_NO FROM DBA_ACNO", "ACCT_NO");
+	    	
+	        return listen;
 	    }
 	    
 	    @Bean
 	    public ItemCountListener cntlistener() {
-	        return new ItemCountListener();
+	        return new ItemCountListener("ERIC_THREAD_LOG");
 	    }
+	    
+	    @Bean
+	    public EricSkipListener errorlistener()
+	    {
+	    	return new EricSkipListener();
+	    }
+	    
+	    @Bean
+	    public EricReadListener readlistener()
+	    {
+	    	return new EricReadListener();
+	    }
+	    
+	    public DataSource dataSource2() {
+	        DataSourceBuilder dataSourceBuilder = DataSourceBuilder.create();
+	        dataSourceBuilder.driverClassName("com.ibm.db2.jcc.DB2Driver");
+	        dataSourceBuilder.url("jdbc:db2://134.251.80.228:55000/CR:currentSchema=ECSCRDB;currentFunctionPath=ECSCRDB;");
+	        dataSourceBuilder.username("CRAP1");
+	        dataSourceBuilder.password("1qaz2wsx");
+	        return dataSourceBuilder.build();
+	  }
 
 }

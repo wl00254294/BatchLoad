@@ -16,16 +16,21 @@ public class EricThreadProcessor implements ItemProcessor<EricThread, EricThread
 	
 	  @Override
 	  public EricThread process(EricThread data) throws Exception {
-		  ValueWrapper key = cacheManager.getCache("DBA_ACNO").get(data.getCol1());
 		  
+		  System.out.println(data.getCol1()+"<========Process===");
+		  
+		  ValueWrapper key = cacheManager.getCache("ERIC_THREAD_REF").get(data.getCol1());
+		  EricThread outData = new EricThread();
 		  if(key != null)
 		  {
 			  System.out.println("found key");
+			  
+			 
 		  }else {
+			 
 			  System.out.println("not found key");
 		  }
 		  
-		  EricThread outData = new EricThread();
 		  outData.setCol1(data.getCol1());
 		  outData.setCol2(data.getCol2());
 		  outData.setCol3(data.getCol3());
@@ -34,7 +39,7 @@ public class EricThreadProcessor implements ItemProcessor<EricThread, EricThread
 		  outData.setCol6(data.getCol6());
 		  outData.setCol7(data.getCol7());
 
-          System.out.println(data.getCol1()+"<========Process===");
+          
 	    return outData;
 	  }
 }

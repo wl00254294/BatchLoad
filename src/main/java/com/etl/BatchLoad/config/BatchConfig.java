@@ -9,10 +9,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 @Configuration
 @EnableBatchProcessing
+
 public class BatchConfig extends DefaultBatchConfigurer{
 	 
 	 @Value("${spring.datasource.driver-class-name}")
@@ -33,6 +35,7 @@ public class BatchConfig extends DefaultBatchConfigurer{
 	  }
 	 
 	  @Bean
+	 // @Scope("singleton")
 	  public DataSource dataSource() {
 	        DataSourceBuilder dataSourceBuilder = DataSourceBuilder.create();
 	        dataSourceBuilder.driverClassName(className);
