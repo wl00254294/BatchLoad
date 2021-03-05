@@ -26,6 +26,7 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.util.StringUtils;
 
 import com.etl.BatchLoad.comm.FlatFileItemReaderBinary;
+import com.etl.BatchLoad.comm.ItemCountListener;
 
 
 
@@ -52,6 +53,8 @@ public class EricThreadConfig {
 	        .reader(reader2())
 	        .processor(processor2())
 	        .writer(classifierItemWriter())
+	        .listener(cntlistener())
+	        
             .taskExecutor(taskExecutor())
 	        .throttleLimit(5) //5個thread
 	        .build();
@@ -171,9 +174,15 @@ public class EricThreadConfig {
 	        return iwt;
 	  }
 	  
+	    //job start 時cache reference
 	    @Bean
 	    public JobExecutionListener jobExecutionEricThreadListener() {
 	        return new EricThreadListener();
+	    }
+	    
+	    @Bean
+	    public ItemCountListener cntlistener() {
+	        return new ItemCountListener();
 	    }
 
 }

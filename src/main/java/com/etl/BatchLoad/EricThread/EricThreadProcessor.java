@@ -14,7 +14,6 @@ public class EricThreadProcessor implements ItemProcessor<EricThread, EricThread
 	@Autowired
 	private CacheManager cacheManager;
 	
-	private int cnt=0;
 	  @Override
 	  public EricThread process(EricThread data) throws Exception {
 		  ValueWrapper key = cacheManager.getCache("DBA_ACNO").get(data.getCol1());
@@ -34,8 +33,8 @@ public class EricThreadProcessor implements ItemProcessor<EricThread, EricThread
 		  outData.setCol5(data.getCol5());
 		  outData.setCol6(data.getCol6());
 		  outData.setCol7(data.getCol7());
-	      cnt++; 
-          System.out.println(data.getCol1()+"<========Process=>"+cnt+"==");
+
+          System.out.println(data.getCol1()+"<========Process===");
 	    return outData;
 	  }
 }

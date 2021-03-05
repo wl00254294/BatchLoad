@@ -10,12 +10,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import com.etl.BatchLoad.comm.BatchEtlLog;
+
 public class EricThreadListener implements JobExecutionListener{
     @Autowired
 	private CacheManager cacheManager;
     
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    
+    @Autowired
+    private BatchEtlLog etllog;
     
     @Override
     public void beforeJob(JobExecution jobExecution) {
@@ -31,6 +36,12 @@ public class EricThreadListener implements JobExecutionListener{
         // clear cache when the job is finished
     	System.out.println("===after job execute===");
     	releaseCacheDbaAcno();
+    	etllog.insertLog("eric_thread","eric_thread", "eric_thread", getReadCount(), 0, 0, 0, 0, 0, "20210304");
+    }
+    
+    public int getReadCount()
+    {
+      return (int)cacheManager.getCache("TOTALCNT").get("TOTALCNT").get();
     }
     
     public void cacheDbaAcno()
