@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Jobs>
+	<Job name="ERIC_THREAD">
+		<cachename name ="REF">
+		<sql>SELECT ACCT_NO,ACCT_KEY FROM DBA_ACNO</sql>
+		<keycolumn>ACCT_NO</keycolumn>
+		<valuecolumn>ACCT_KEY</valuecolumn>
+		</cachename>
+		<cachename name ="REF2">
+		<sql>SELECT P_SEQNO,ACCT_TYPE FROM DBA_ACNO</sql>
+		<keycolumn>P_SEQNO</keycolumn>
+		<valuecolumn>ACCT_TYPE</valuecolumn>
+		</cachename>		
+	</Job>
+</Jobs>

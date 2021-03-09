@@ -1,6 +1,7 @@
 package com.etl.BatchLoad;
 
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
@@ -15,6 +16,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
+
+import com.etl.BatchLoad.comm.CacheInfoDAO;
+import com.etl.BatchLoad.comm.CacheInfoParser;
+
 import org.springframework.context.ConfigurableApplicationContext;
 
 
@@ -25,6 +30,8 @@ public class BatchLoadApplication {
 
 	public static void main(String[] args) throws BeansException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, JobParametersInvalidException {
 		SpringApplication application = new SpringApplication(BatchLoadApplication.class);
+		
+		
 		ConfigurableApplicationContext ctx = application.run(args);
         JobLauncher jobLauncher = ctx.getBean(JobLauncher.class);
         
@@ -35,7 +42,9 @@ public class BatchLoadApplication {
         
         //1 min 19 sec
         jobLauncher.run(ctx.getBean("ericJob", Job.class), jobParameters);
-
+        
+        
+        
 	}
 
 }

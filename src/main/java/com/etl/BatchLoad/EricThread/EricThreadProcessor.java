@@ -19,26 +19,30 @@ public class EricThreadProcessor implements ItemProcessor<EricThread, EricThread
 		  
 		  System.out.println(data.getCol1()+"<========Process===");
 		  
-		  ValueWrapper key = cacheManager.getCache("ERIC_THREAD_REF").get(data.getCol1());
+		  //ValueWrapper key = cacheManager.getCache("ERIC_THREAD_REF").get(data.getCol1());
 		  EricThread outData = new EricThread();
-		  if(key != null)
-		  {
-			  System.out.println("found key");
+		 // if(key != null)
+		  //{
+			//  System.out.println("found key");
 			  
 			 
-		  }else {
+		  //}else {
 			 
-			  System.out.println("not found key");
-		  }
-		  
+		//	  System.out.println("not found key");
+		 // }
 		  outData.setCol1(data.getCol1());
 		  outData.setCol2(data.getCol2());
 		  outData.setCol3(data.getCol3());
 		  outData.setCol4(data.getCol4());
 		  outData.setCol5(data.getCol5());
 		  outData.setCol6(data.getCol6());
-		  outData.setCol7(data.getCol7());
-
+		  if(data.getCol1().equals("1110320095"))
+		  {
+		 
+		  outData.setCol7("IIIIIIIIIII");
+		  }else {
+			  outData.setCol7(data.getCol7());
+		  }
           
 	    return outData;
 	  }

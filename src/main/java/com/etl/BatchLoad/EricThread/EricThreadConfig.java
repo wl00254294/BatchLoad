@@ -27,9 +27,11 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.util.StringUtils;
 
 import com.etl.BatchLoad.comm.FlatFileItemReaderBinary;
-import com.etl.BatchLoad.comm.ItemCountListener;
-import com.etl.BatchLoad.comm.JobListener;
 import com.etl.BatchLoad.config.BatchConfig;
+import com.etl.BatchLoad.listener.DataReadListener;
+import com.etl.BatchLoad.listener.DataWriteListener;
+import com.etl.BatchLoad.listener.ItemCountListener;
+import com.etl.BatchLoad.listener.JobListener;
 
 
 
@@ -59,6 +61,7 @@ public class EricThreadConfig {
 	        .processor(processor2())
 	        .writer(classifierItemWriter())
 	        .listener(readlistener())
+	        .listener(writelistener())
 	        .listener(errorlistener()) //紀錄wiriter reader process 有問題狀態
 	        .listener(cntlistener()) //紀錄讀取筆數(因parallel執行須透過chunklistener)
             .taskExecutor(taskExecutor())
@@ -73,7 +76,7 @@ public class EricThreadConfig {
 		  itemReader.setEncoding("MS950");
 		  itemReader.setLineMapper(lineMapper2());
 		
-		  itemReader.setResource(new FileSystemResource("C:\\cr\\EcsWeb\\media\\1\\1.txt"));
+		  itemReader.setResource(new FileSystemResource("C:\\cr\\EcsWeb\\media\\1\\2.txt"));
 		  
 		  return itemReader;
 		  
@@ -129,7 +132,7 @@ public class EricThreadConfig {
 	  	                    new Range(53, 53)
 	  			            );
 	  	
-	  	tokenizer.setStrict(false); 
+	  	//tokenizer.setStrict(false); 
 
 	  	return tokenizer;
 	  }
@@ -153,7 +156,7 @@ public class EricThreadConfig {
 	   * wirter1 寫入 Eric_Thread table
 	   */
 	  @Bean
-	  public JdbcBatchItemWriter<EricThread> insertTable1() {
+	  public JdbcBatchItemWriter<EricThread> insertTable1()  throws Exception{
 		   
 		     JdbcBatchItemWriter<EricThread> iwt = new JdbcBatchItemWriter<>();
 		    
@@ -169,7 +172,7 @@ public class EricThreadConfig {
 	   * wirter2 寫入 Eric_Thread2 table
 	   */
 	  @Bean
-	  public JdbcBatchItemWriter<EricThread> insertTable2() {
+	  public JdbcBatchItemWriter<EricThread> insertTable2()  throws Exception{
 		   
 		     JdbcBatchItemWriter<EricThread> iwt = new JdbcBatchItemWriter<>();
 		   
@@ -183,15 +186,15 @@ public class EricThreadConfig {
 	    //job start 時cache reference
 	    @Bean
 	    public JobExecutionListener jobExecutionEricThreadListener() {
-	    	JobListener listen = new JobListener("ERIC_THREAD","Y");
-	    	listen.setCacheRefTableInfo("REF", "SELECT ACCT_NO FROM DBA_ACNO", "ACCT_NO");
+	    	JobListener listen = new JobListener("ERIC_THREAD");
+	    	listen.isCacheTable(true);
 	    	
 	        return listen;
 	    }
 	    
 	    @Bean
 	    public ItemCountListener cntlistener() {
-	        return new ItemCountListener("ERIC_THREAD_LOG");
+	        return new ItemCountListener("ERIC_THREAD");
 	    }
 	    
 	    @Bean
@@ -201,18 +204,18 @@ public class EricThreadConfig {
 	    }
 	    
 	    @Bean
-	    public EricReadListener readlistener()
+	    public DataReadListener<EricThread> readlistener()
 	    {
-	    	return new EricReadListener();
+	    	DataReadListener<EricThread> read = new DataReadListener<EricThread>("ERIC_THREAD");
+	    	return read;
 	    }
 	    
-	    public DataSource dataSource2() {
-	        DataSourceBuilder dataSourceBuilder = DataSourceBuilder.create();
-	        dataSourceBuilder.driverClassName("com.ibm.db2.jcc.DB2Driver");
-	        dataSourceBuilder.url("jdbc:db2://134.251.80.228:55000/CR:currentSchema=ECSCRDB;currentFunctionPath=ECSCRDB;");
-	        dataSourceBuilder.username("CRAP1");
-	        dataSourceBuilder.password("1qaz2wsx");
-	        return dataSourceBuilder.build();
-	  }
+	    @Bean
+	    public DataWriteListener<EricThread> writelistener()
+	    {
+	    	DataWriteListener<EricThread> write = new DataWriteListener<EricThread>("ERIC_THREAD");
+	    	return write;
+	    }
+
 
 }
