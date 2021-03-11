@@ -19,6 +19,24 @@ public class BatchEtlLog {
 	@Value("${batch.etl.log.table}")
 	 private String logtable;
 	
+	@Value("${batch.etl.detail.table}")
+	private String detailtable;
+	
+	public void insertDetail(String jobseq,String jobname
+			,String data,String step,String type,String msg)
+	{
+		jdbcTemplate.update("INSERT INTO "+detailtable+" (JOB_SEQ,"
+				+ "JOB_NAME,"
+				+ "DATA,"
+				+ "STEP,"
+				+ "TYPE,"
+				+ "MSG,"
+				+ "EVENT_TIME) VALUES (?,?,?,?,?,?,current_timestamp) ",
+				jobseq,jobname,data,step,type,msg
+				);
+	}
+	
+	
 	public void insertLog(String jobseq,String jobname,int readcnt,int skipcnt ,
 			             int writecnt,int sumfieldreadcnt,int sumfieldskipcnt,
 			             int sumfieldwritecnt,String jobstatus,String msg,Timestamp starttime,Time elapsedtime

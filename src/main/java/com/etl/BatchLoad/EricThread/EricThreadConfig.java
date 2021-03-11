@@ -28,6 +28,7 @@ import org.springframework.util.StringUtils;
 
 import com.etl.BatchLoad.comm.FlatFileItemReaderBinary;
 import com.etl.BatchLoad.config.BatchConfig;
+import com.etl.BatchLoad.listener.DataProcessListener;
 import com.etl.BatchLoad.listener.DataReadListener;
 import com.etl.BatchLoad.listener.DataWriteListener;
 import com.etl.BatchLoad.listener.ItemCountListener;
@@ -61,6 +62,7 @@ public class EricThreadConfig {
 	        .processor(processor2())
 	        .writer(classifierItemWriter())
 	        .listener(readlistener())
+	        .listener( proceselistener())
 	        .listener(writelistener())
 	        .listener(errorlistener()) //紀錄wiriter reader process 有問題狀態
 	        .listener(cntlistener()) //紀錄讀取筆數(因parallel執行須透過chunklistener)
@@ -215,6 +217,14 @@ public class EricThreadConfig {
 	    {
 	    	DataWriteListener<EricThread> write = new DataWriteListener<EricThread>("ERIC_THREAD");
 	    	return write;
+	    }
+	    
+	    @Bean
+	    public DataProcessListener<EricThread,EricThread> proceselistener()
+	    {
+	    	DataProcessListener<EricThread,EricThread> process = new DataProcessListener<EricThread,EricThread>("ERIC_THREAD");
+	    	
+	    	return process;
 	    }
 
 

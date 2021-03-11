@@ -6,10 +6,16 @@ import org.springframework.batch.core.ItemWriteListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 
+import com.etl.BatchLoad.comm.BatchEtlLog;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class DataWriteListener<T> implements ItemWriteListener<T> {
 	
 	@Autowired
 	 private CacheManager cacheManager;
+	@Autowired
+	private BatchEtlLog log;
 	
 	private String jobName;
 	
@@ -32,6 +38,22 @@ public class DataWriteListener<T> implements ItemWriteListener<T> {
     public void onWriteError(Exception exception, List<? extends T> items) {
     
     	cacheManager.getCache(jobName+"_STATUS").put("STATUS", "FAIL");
+    	
+    	for(int i=0;i<items.size();i++)
+    	{
+    		ObjectMapper objectMapper = new ObjectMapper();
+   		    try {
+   		    	String jsondata = objectMapper.writeValueAsString(items.get(i));
+ 			
+   		    	String jobseq = (String) cacheManager.getCache(jobName+"_JOBSEQ").get("JOBSEQ").get();
+ 			    log.insertDetail(jobseq, jobName, jsondata, "Writer","ERROR", exception.toString());
+   		    } catch (JsonProcessingException e1) {
+   		    	// TODO Auto-generated catch block
+   		    	e1.printStackTrace();
+   		    }
+    	}
+    	
+    	
 		System.out.println(exception.getMessage());
     }
 }

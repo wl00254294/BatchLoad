@@ -39,8 +39,14 @@ public class EricThreadProcessor implements ItemProcessor<EricThread, EricThread
 		  if(data.getCol1().equals("1110320095"))
 		  {
 		 
-		  outData.setCol7("IIIIIIIIIII");
-		  }else {
+		  outData.setCol7("I");
+		  }//else if(data.getCol1().equals("3110320095"))
+		 // {
+		//	  System.out.println("=====process error test===");
+		//	  int[] i = {1,2};
+		//		int k = i[2];
+		 // }
+		  else {
 			  outData.setCol7(data.getCol7());
 		  }
           

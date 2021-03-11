@@ -16,17 +16,14 @@ import com.etl.BatchLoad.comm.CacheInfoDAO;
 public  class Test {
 
 	public static List<Element> book_children;
-	//public static void main(String[] args) {
-		// TODO Auto-generated method stub
-	//	Test aa =new Test();
+	public static void main(String[] args) {
+        
+		int[] i = {1,2};
+		int k = i[2];
+		//System.out.println(i);
 		
-	//	List<CacheInfoDAO> tt =  aa.JDOM("ERIC_THREAD");
-	//	for(int i=0;i<tt.size();i++)
-	//	{
-	//		System.out.println(tt.get(i).getSql());
-	//	}
 
-	//}
+	}
 	public static List<CacheInfoDAO> JDOM(String jobname) {
 		 List<CacheInfoDAO> out = new ArrayList<CacheInfoDAO>();
 		 SAXBuilder builder=new SAXBuilder();

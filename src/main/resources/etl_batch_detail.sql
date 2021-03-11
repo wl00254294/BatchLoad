@@ -1,0 +1,9 @@
+CREATE TABLE etl_batch_detail  (
+          "JOB_SEQ"  VARCHAR(50) WITH DEFAULT '' ,
+		  "JOB_NAME" VARCHAR(50) WITH DEFAULT '' , 
+          "DATA" VARCHAR(20000) WITH DEFAULT '',
+          "STEP" VARCHAR(50) WITH DEFAULT '' , 
+          "TYPE"  VARCHAR(50) WITH DEFAULT '' ,
+          "MSG"	VARCHAR(3000) WITH DEFAULT '',	  
+		  "EVENT_TIME" TIMESTAMP
+		  );
